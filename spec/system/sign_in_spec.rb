@@ -55,4 +55,45 @@ RSpec.describe 'Sign In' do
       expect(page).not_to have_content('Document Templates')
     end
   end
+
+  context 'when sign-in goes through OIDC' do
+    def enable_oidc
+      allow(Devise).to receive(:omniauth_configs).and_return(oidc: Object.new)
+    end
+
+    it "doesn't sign in with a valid email and password" do
+      enable_oidc
+      fill_in 'Email', with: 'john.dou@example.com'
+      fill_in 'Password', with: 'strong_password'
+      click_button 'Sign In'
+      visit root_path
+
+      expect(page).not_to have_content('Document Templates')
+      expect(user.reload.sign_in_count).to eq(0)
+    end
+
+    it "doesn't sign in through a password reset link" do
+      visit edit_user_password_path(reset_password_token: user.send(:set_reset_password_token))
+      enable_oidc
+      fill_in 'New password', with: 'new_strong_password'
+      fill_in 'Confirm new password', with: 'new_strong_password'
+      click_button 'Change my password'
+      visit root_path
+
+      expect(page).not_to have_content('Document Templates')
+      expect(user.reload.sign_in_count).to eq(0)
+    end
+
+    it "doesn't sign in through an invitation link" do
+      visit invitation_path(reset_password_token: user.send(:set_reset_password_token))
+      enable_oidc
+      fill_in 'Set password', with: 'new_strong_password'
+      fill_in 'Confirm new password', with: 'new_strong_password'
+      click_button 'Save password and Sign in'
+      visit root_path
+
+      expect(page).not_to have_content('Document Templates')
+      expect(user.reload.sign_in_count).to eq(0)
+    end
+  end
 end

@@ -14,8 +14,9 @@ Rails.application.routes.draw do
   get 'up' => 'rails/health#show'
   get 'manifest' => 'pwa#manifest'
 
-  devise_for :users, path: '/', only: %i[sessions passwords],
-                     controllers: { sessions: 'sessions', passwords: 'passwords' }
+  devise_for :users, path: '/', only: %i[sessions passwords omniauth_callbacks],
+                     controllers: { sessions: 'sessions', passwords: 'passwords',
+                                    omniauth_callbacks: 'users/omniauth_callbacks' }
 
   devise_scope :user do
     resource :invitation, only: %i[update] do
@@ -75,8 +76,6 @@ Rails.application.routes.draw do
   end
   resources :submitters, only: %i[edit update]
   resources :console_redirect, only: %i[index]
-  resources :upgrade, only: %i[index], controller: 'console_redirect'
-  resources :manage, only: %i[index], controller: 'console_redirect'
   resource :testing_account, only: %i[create destroy]
   resources :testing_api_settings, only: %i[index]
   resources :submitters_autocomplete, only: %i[index]

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class SessionsController < Devise::SessionsController
+  prepend_before_action -> { head :forbidden }, only: :create, if: -> { Devise.omniauth_configs.any? }
+
   before_action :configure_permitted_parameters
 
   skip_before_action :verify_authenticity_token, if: -> { request.xhr? && request.format.json? }
