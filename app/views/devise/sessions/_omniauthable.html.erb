@@ -1,0 +1,6 @@
+<% if Devise.omniauth_configs.key?(:openid_connect) %>
+  <%= button_to 'Continue with CIRQLE SSO', user_openid_connect_omniauth_authorize_path, class: 'base-button w-full mt-8', form: { data: { turbo: false } } %>
+  <div class="text-center text-sm mt-6">
+    <%= render 'shared/cirqle_source_link' %>
+  </div>
+<% end %>

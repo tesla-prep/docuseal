@@ -10,6 +10,8 @@ class SessionsController < Devise::SessionsController
   around_action :with_browser_locale
 
   def create
+    return head :forbidden if Devise.omniauth_configs.any?
+
     email = sign_in_params[:email].to_s.downcase
 
     if Docuseal.multitenant? && !User.exists?(email:)

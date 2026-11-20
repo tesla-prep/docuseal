@@ -1,3 +1,27 @@
+## CIRQLE fork
+
+CIRQLE's DocuSeal at https://sign.cirqlecirqle.com. The `cirqle` branch is the latest upstream release plus the changes below, kept small so each release merges cleanly. Modified by CIRQLE since 2026-11-20 (AGPL-3.0 §5(a)); everything else is upstream DocuSeal.
+
+- **Sign-in through Keycloak (OpenID Connect).** `config/initializers/devise_cirqle_oidc.rb`, `app/controllers/users/omniauth_callbacks_controller.rb`, `app/views/devise/sessions/_omniauthable.html.erb` and `new.html.erb`, `app/controllers/sessions_controller.rb`, `app/models/user.rb`, `config/routes.rb`, `Gemfile`. With `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and `HOST` set, the sign-in page shows only "Continue with CIRQLE SSO", password sign-in is refused, and the first SSO sign-in creates the user by email.
+- **No Pro upsell.** Emptied placeholders: `templates_code_modal/_placeholder`, `notifications_settings/_reminder_placeholder`, `sso_settings/_placeholder`, `sms_settings/_placeholder`, `personalization_settings/_logo_placeholder`, `submissions/_send_sms_button`, `esign_settings/_default_signature_row`, `users/_role_select`. Removed links: Upgrade (`shared/_navbar_buttons`), Console (`shared/_navbar`), Plans, Console, SMS and SSO (`shared/_settings_nav`), console "Learn more" (`templates/_embedding`), the bulk-send tab (`submissions/new`), locked phone and QES fields (`template_builder/fields.vue`), condition and formula menu items (`template_builder/field_settings.vue`, `field_context_menu.vue`).
+- **Source link** next to "Powered by DocuSeal" (AGPL-3.0 §13; the attribution stays per §7(b)): `shared/_cirqle_source_link.html.erb`, `shared/_powered_by.html.erb`.
+- **Image.** `.github/workflows/cirqle-image.yml` pushes `ghcr.io/tesla-prep/docuseal:cirqle-<sha>` for every push to `cirqle` and `capy/**`, plus `:cirqle` for the branch head.
+
+### Taking a new upstream release
+
+```sh
+git remote add upstream https://github.com/docusealco/docuseal.git   # once
+git fetch upstream --tags
+git switch -c capy/upstream-3.3.9 origin/cirqle                       # 3.3.9 = the new release tag
+git merge 3.3.9
+# Conflicts can only be in the files above: keep upstream's change and re-apply ours.
+# Emptied placeholders stay empty; delete any new "Unlock with DocuSeal Pro" placeholder the same way:
+grep -rn "unlock_with_docuseal_pro\|console_redirect_index_path\|docuseal.com/pricing" app/views app/javascript
+git push origin capy/upstream-3.3.9                                   # never push upstream tags: upstream docker.yml runs on them
+```
+
+Open a pull request into `cirqle`. CI (upstream `ci.yml`) and the image build run on the push; deploy the `cirqle-<sha>` image as described in tesla-prep/cirqle-sso `docs/16_DOCUSEAL.md`.
+
 <h1 align="center" style="border-bottom: none">
   <div>
     <a href="https://www.docuseal.com">
