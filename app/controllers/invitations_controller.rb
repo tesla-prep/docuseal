@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class InvitationsController < Devise::PasswordsController
-  before_action -> { head :forbidden }, if: -> { Devise.omniauth_configs.any? }
+  prepend_before_action -> { head :forbidden }, if: -> { Devise.omniauth_configs.any? }
 
   def update
     super do |resource|

@@ -6,7 +6,7 @@ class PasswordsController < Devise::PasswordsController
 
   around_action :with_browser_locale
 
-  before_action -> { head :forbidden }, if: -> { Devise.omniauth_configs.any? }
+  prepend_before_action -> { head :forbidden }, if: -> { Devise.omniauth_configs.any? }
 
   class Current < ActiveSupport::CurrentAttributes
     attribute :user

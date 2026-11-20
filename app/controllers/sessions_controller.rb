@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class SessionsController < Devise::SessionsController
+  prepend_before_action -> { head :forbidden }, only: :create, if: -> { Devise.omniauth_configs.any? }
+
   before_action :configure_permitted_parameters
 
   skip_before_action :verify_authenticity_token, if: -> { request.xhr? && request.format.json? }
@@ -10,8 +12,6 @@ class SessionsController < Devise::SessionsController
   around_action :with_browser_locale
 
   def create
-    return head :forbidden if Devise.omniauth_configs.any?
-
     email = sign_in_params[:email].to_s.downcase
 
     if Docuseal.multitenant? && !User.exists?(email:)
