@@ -3,6 +3,7 @@
 # CIRQLE: sign-in through Keycloak (OpenID Connect). On when OIDC_ISSUER is set; password sign-in is then off.
 if ENV['OIDC_ISSUER'].present?
   Devise.setup do |config|
+    config.params_authenticatable = false
     config.omniauth :openid_connect,
                     issuer: ENV.fetch('OIDC_ISSUER'),
                     discovery: true,
