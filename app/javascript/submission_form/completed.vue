@@ -105,7 +105,11 @@
         href="https://www.docuseal.com/start"
         target="_blank"
         class="underline"
-      >DocuSeal</a> - {{ t('open_source_documents_software') }}
+      >DocuSeal</a> - {{ t('open_source_documents_software') }} - <a
+        href="https://github.com/tesla-prep/docuseal"
+        target="_blank"
+        class="underline"
+      >Source code</a>
     </div>
   </div>
 </template>

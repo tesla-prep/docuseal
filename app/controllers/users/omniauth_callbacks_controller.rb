@@ -10,6 +10,11 @@ module Users
              User.create!(account: Account.order(:id).first, email:, first_name: info.first_name,
                           last_name: info.last_name, password: SecureRandom.base58(32))
 
+      unless user.active_for_authentication?
+        return redirect_to new_user_session_path,
+                           alert: 'Your DocuSeal account is archived. Ask an administrator to restore it.'
+      end
+
       sign_in_and_redirect user, event: :authentication
     end
   end
