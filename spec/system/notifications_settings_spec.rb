@@ -103,6 +103,10 @@ RSpec.describe 'Notifications Settings' do
     end
     let(:first_submitter) { submission.submitters.find_by(uuid: template.submitters.first['uuid']) }
     let(:second_submitter) { submission.submitters.find_by(uuid: template.submitters.second['uuid']) }
+    let(:twilio_env) do
+      { 'TWILIO_ACCOUNT_SID' => 'AC0', 'TWILIO_API_KEY_SID' => 'SK0', 'TWILIO_API_KEY_SECRET' => 'secret',
+        'TWILIO_MESSAGING_SERVICE_SID' => 'MG0' }
+    end
 
     before do
       allow(Sidekiq).to receive(:redis).and_return('OK')
@@ -124,13 +128,13 @@ RSpec.describe 'Notifications Settings' do
     end
 
     it 'also texts the signer whose turn it is when they have a phone and Twilio is configured' do
-      stub_const('ENV', ENV.to_h.merge('TWILIO_ACCOUNT_SID' => 'AC0', 'TWILIO_API_KEY_SID' => 'SK0',
-                                       'TWILIO_API_KEY_SECRET' => 'secret', 'TWILIO_MESSAGING_SERVICE_SID' => 'MG0'))
+      stub_const('ENV', ENV.to_h.merge(twilio_env))
       first_submitter.update!(phone: '+12145550100')
       second_submitter.update!(phone: '+12145550101')
+      body = %r{\ACIRQLE: reminder to sign ".+": https?://\S+/s/#{first_submitter.slug}\z}
       twilio = stub_request(:post, 'https://api.twilio.com/2010-04-01/Accounts/AC0/Messages.json')
                .with(basic_auth: %w[SK0 secret],
-                     body: hash_including('To' => '+12145550100', 'MessagingServiceSid' => 'MG0'))
+                     body: hash_including('To' => '+12145550100', 'MessagingServiceSid' => 'MG0', 'Body' => body))
                .to_return(status: 201, body: '{}')
 
       expect { SendSubmitterRemindersJob.new.perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
@@ -140,11 +144,19 @@ RSpec.describe 'Notifications Settings' do
       expect(second_submitter.submission_events.count).to eq(0)
     end
 
+    it 'does not text anyone when Twilio is not configured' do
+      first_submitter.update!(phone: '+12145550100')
+      twilio = stub_request(:post, /api\.twilio\.com/)
+
+      expect { SendSubmitterRemindersJob.new.perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
+
+      expect(twilio).not_to have_been_requested
+    end
+
     it 'does not text signers without a phone' do
-      stub_const('ENV', ENV.to_h.merge('TWILIO_ACCOUNT_SID' => 'AC0', 'TWILIO_API_KEY_SID' => 'SK0',
-                                       'TWILIO_API_KEY_SECRET' => 'secret', 'TWILIO_MESSAGING_SERVICE_SID' => 'MG0'))
+      stub_const('ENV', ENV.to_h.merge(twilio_env))
       first_submitter.update!(phone: '')
-      twilio = stub_request(:post, %r{api.twilio.com})
+      twilio = stub_request(:post, /api\.twilio\.com/)
 
       expect { SendSubmitterRemindersJob.new.perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
 
@@ -152,10 +164,9 @@ RSpec.describe 'Notifications Settings' do
     end
 
     it 'still sends the email when the SMS fails' do
-      stub_const('ENV', ENV.to_h.merge('TWILIO_ACCOUNT_SID' => 'AC0', 'TWILIO_API_KEY_SID' => 'SK0',
-                                       'TWILIO_API_KEY_SECRET' => 'secret', 'TWILIO_MESSAGING_SERVICE_SID' => 'MG0'))
+      stub_const('ENV', ENV.to_h.merge(twilio_env))
       first_submitter.update!(phone: '+12145550100')
-      stub_request(:post, %r{api.twilio.com}).to_return(status: 400, body: '{}')
+      stub_request(:post, /api\.twilio\.com/).to_return(status: 400, body: '{}')
 
       expect { SendSubmitterRemindersJob.new.perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
 

@@ -7,6 +7,8 @@ class SendSubmitterRemindersJob
 
   INTERVAL = 10.minutes
 
+  TWILIO_ENV = %w[TWILIO_ACCOUNT_SID TWILIO_API_KEY_SID TWILIO_API_KEY_SECRET TWILIO_MESSAGING_SERVICE_SID].freeze
+
   def perform
     lock_seconds = (INTERVAL - 1.minute).to_i
 
@@ -51,7 +53,7 @@ class SendSubmitterRemindersJob
 
     SubmissionEvent.create!(submitter:, event_type: 'send_reminder_email')
 
-    send_sms_reminder(submitter) if submitter.phone.present? && ENV['TWILIO_MESSAGING_SERVICE_SID'].present?
+    send_sms_reminder(submitter) if submitter.phone.present? && ENV.values_at(*TWILIO_ENV).all?(&:present?)
   rescue StandardError => e
     Rails.logger.error("Submitter reminder #{submitter.id} failed: #{e.message}")
   end
@@ -69,7 +71,7 @@ class SendSubmitterRemindersJob
       'Content-Type' => 'application/x-www-form-urlencoded'
     )
 
-    raise "Twilio answered HTTP #{response.status}" unless response.success?
+    raise "Twilio answered HTTP #{response.status}: #{response.body}" unless response.success?
 
     SubmissionEvent.create!(submitter:, event_type: 'send_sms')
   end
