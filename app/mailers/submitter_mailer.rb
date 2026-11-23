@@ -102,6 +102,12 @@ class SubmitterMailer < ApplicationMailer
     maybe_set_custom_domain(@submitter)
 
     I18n.with_locale(@current_account.locale) do
+      unless @email_config
+        default_config = AccountConfig::DEFAULT_VALUES[AccountConfig::SUBMITTER_INVITATION_REMINDER_EMAIL_KEY].call
+        @body ||= default_config['body']
+        @subject ||= default_config['subject']
+      end
+
       subject = build_invite_subject(@subject, @email_config, submitter)
 
       mail(

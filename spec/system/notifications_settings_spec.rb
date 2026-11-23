@@ -116,6 +116,7 @@ RSpec.describe 'Notifications Settings' do
       expect { SendSubmitterRemindersJob.new.perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       expect(ActionMailer::Base.deliveries.last.to).to eq([first_submitter.email])
+      expect(ActionMailer::Base.deliveries.last.subject).to eq('Reminder: you are invited to sign a document')
       expect(first_submitter.submission_events.where(event_type: 'send_reminder_email').count).to eq(1)
       expect(second_submitter.submission_events.count).to eq(0)
 

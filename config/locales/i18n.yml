@@ -127,6 +127,7 @@ en: &en
   verification_code_sms_body: 'Verification code: {code}'
   you_are_invited_to_submit_a_form: 'You are invited to submit a form'
   you_are_invited_to_sign_a_document: 'You are invited to sign a document'
+  reminder_you_are_invited_to_sign_a_document: 'Reminder: you are invited to sign a document'
   you_are_invited_to_view_a_document: 'You are invited to view a document'
   you_are_invited_to_sign_documents: 'You are invited to sign documents'
   your_document_copy: 'Your document copy'
@@ -136,6 +137,17 @@ en: &en
     Hi there,
 
     You have been invited to sign the "{template.name}".
+
+    [Review and Sign]({submitter.link})
+
+    Please contact us by replying to this email if you have any questions.
+
+    Thanks,
+    {account.name}
+  submitter_invitation_reminder_email_sign_body: |
+    Hi there,
+
+    This is a reminder that you have been invited to sign the "{template.name}" and your signature is still pending.
 
     [Review and Sign]({submitter.link})
 

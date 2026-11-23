@@ -19,6 +19,8 @@ module.exports = {
           'base-200': '#f5f0e3',
           'base-300': '#d3cec3',
           'base-content': '#252422',
+          warning: '#fb8258',
+          'warning-content': '#252422',
           '--rounded-btn': '1.9rem',
           '--tab-border': '2px',
           '--tab-radius': '.5rem'
