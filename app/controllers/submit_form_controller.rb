@@ -26,10 +26,7 @@ class SubmitFormController < ApplicationController
 
     @form_configs = Submitters::FormConfigs.call(@submitter, CONFIG_KEYS)
 
-    return render :awaiting if !submission.submitters_order_random? &&
-                               (@form_configs[:enforce_signing_order] ||
-                                submission.template&.preferences&.dig('submitters_order') == 'preserved') &&
-                               !Submitters.current_submitter_order?(@submitter)
+    return render :awaiting unless Submitters::AuthorizedForForm.pass_submitters_order?(@submitter)
 
     Submissions.preload_with_pages(submission)
 
