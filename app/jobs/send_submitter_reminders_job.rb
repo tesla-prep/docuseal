@@ -17,14 +17,14 @@ class SendSubmitterRemindersJob
     AccountConfig.where(key: AccountConfig::SUBMITTER_REMINDERS).find_each do |config|
       durations = config.value.to_h.values_at('first_duration', 'second_duration', 'third_duration')
                         .filter_map { |key| AccountConfigs::REMINDER_DURATIONS[key] }
-                        .map { |value| value.split.then { |count, unit| count.to_i.public_send(unit) } }
+                        .map { |value| value.split.then { |count, unit| count.to_i.public_send(unit) } }.sort
 
       next if durations.empty?
 
       Submitter.joins(:submission)
                .where(account_id: config.account_id, completed_at: nil, declined_at: nil,
                       submissions: { archived_at: nil })
-               .where(sent_at: (Time.current - durations.sum - 1.day)..)
+               .where(sent_at: (Time.current - durations.last - 1.day)..)
                .where.not(email: [nil, ''])
                .find_each { |submitter| remind(submitter, durations) }
     end
@@ -33,11 +33,10 @@ class SendSubmitterRemindersJob
   private
 
   def remind(submitter, durations)
-    reminders = submitter.submission_events.where(event_type: 'send_reminder_email')
-    count = reminders.count
+    count = submitter.submission_events.where(event_type: 'send_reminder_email').count
 
     return if count >= durations.size
-    return if (reminders.maximum(:event_timestamp) || submitter.sent_at) + durations[count] > Time.current
+    return if submitter.sent_at + durations[count] > Time.current
     return if submitter.viewer?
     return if submitter.preferences['send_email'] == false
     return if submitter.submission.expired?

@@ -122,6 +122,15 @@ RSpec.describe 'Notifications Settings' do
       expect { SendSubmitterRemindersJob.new.perform }.not_to change(ActionMailer::Base.deliveries, :count)
     end
 
+    it 'counts every reminder from the invitation' do
+      first_submitter.update!(sent_at: 3.days.ago)
+      create(:submission_event, submission:, submitter: first_submitter, event_type: 'send_reminder_email',
+                                event_timestamp: 1.day.ago)
+
+      expect { SendSubmitterRemindersJob.new.perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
+      expect(first_submitter.submission_events.where(event_type: 'send_reminder_email').count).to eq(2)
+    end
+
     it 'skips signers who completed or declined' do
       first_submitter.update!(declined_at: Time.current)
       second_submitter.update!(completed_at: Time.current)
