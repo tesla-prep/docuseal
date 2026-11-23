@@ -9,7 +9,7 @@
         loading="lazy"
       >
       <div
-        class="group flex justify-end cursor-pointer top-0 bottom-0 left-0 right-0 absolute p-1 hover:bg-black/10 transition-colors rounded"
+        class="group flex justify-end cursor-pointer top-0 bottom-0 left-0 right-0 absolute p-1 hover:bg-neutral-900/10 transition-colors rounded"
         @click="$emit('scroll-to', item)"
       >
         <div
@@ -122,7 +122,7 @@
                 <hr class="my-1 border-neutral-200">
                 <li>
                   <button
-                    class="w-full px-2 py-1 rounded-md hover:bg-neutral-100 flex items-center space-x-2 text-sm text-red-600"
+                    class="w-full px-2 py-1 rounded-md hover:bg-neutral-100 flex items-center space-x-2 text-sm text-error"
                     @click.stop="$emit('remove', item); closeDropdown()"
                   >
                     <IconTrashX class="w-4 h-4" />

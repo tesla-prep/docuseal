@@ -3,17 +3,17 @@
   <div class="min-h-12 flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-3 py-2">
     <div class="flex items-center gap-4">
       <% if webhook_event.status == 'success' %>
-        <div class="btn btn-outline btn-xs btn-success bg-lime-50 gap-1">
+        <div class="btn btn-outline btn-xs btn-success bg-success/10 gap-1">
           <%= svg_icon('check', class: 'w-4 h-4 shrink-0 stroke-2') %>
           <%= webhook_event.webhook_attempts.max_by(&:id)&.response_status_code if local_assigns[:with_status] %>
         </div>
       <% elsif webhook_event.status == 'pending' %>
-        <div class="btn btn-outline btn-xs btn-info bg-blue-50 gap-1">
+        <div class="btn btn-outline btn-xs btn-info bg-info/10 gap-1">
           <%= svg_icon('clock', class: 'w-4 h-4 shrink-0 stroke-2') %>
           <%= webhook_event.webhook_attempts.max_by(&:id)&.response_status_code if local_assigns[:with_status] %>
         </div>
       <% elsif webhook_event.status == 'error' %>
-        <div class="btn btn-outline btn-xs btn-error bg-red-50 gap-1">
+        <div class="btn btn-outline btn-xs btn-error bg-error/10 gap-1">
           <%= svg_icon('x', class: 'w-4 h-4 shrink-0') %>
           <%= webhook_event.webhook_attempts.max_by(&:id)&.response_status_code if local_assigns[:with_status] %>
         </div>

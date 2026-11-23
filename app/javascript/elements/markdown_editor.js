@@ -162,7 +162,7 @@ export default actionable(targetable(class extends HTMLElement {
         while ((match = regex.exec(node.text)) !== null) {
           decorations.push(
             Decoration.inline(pos + match.index, pos + match.index + match[0].length, {
-              class: 'bg-amber-100 py-0.5 px-1 rounded'
+              class: 'bg-base-300 py-0.5 px-1 rounded'
             })
           )
         }
@@ -223,7 +223,7 @@ export default actionable(targetable(class extends HTMLElement {
           HTMLAttributes: {
             class: 'link',
             'data-turbo': 'false',
-            style: 'color: #2563eb; text-decoration: underline; cursor: text;'
+            style: 'color: #0A332D; text-decoration: underline; cursor: text;'
           }
         }),
         Underline,

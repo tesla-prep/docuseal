@@ -8,7 +8,7 @@
   >
     <div class="font-medium text-2xl flex items-center space-x-1.5 mx-auto">
       <IconCircleCheck
-        class="inline text-green-600"
+        class="inline text-success"
         aria-hidden="true"
         :width="30"
         :height="30"

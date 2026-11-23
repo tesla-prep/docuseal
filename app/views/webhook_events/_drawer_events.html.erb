@@ -18,7 +18,7 @@
     <% if webhook_attempts.present? %>
       <% webhook_attempts.each do |webhook_attempt| %>
         <li class="ml-7">
-          <span class="btn btn-outline btn-xs btn-circle pointer-events-none absolute justify-center <%= webhook_attempt.success? ? 'btn-success bg-lime-50' : 'btn-error bg-red-50' %>" style="left: -12px;">
+          <span class="btn btn-outline btn-xs btn-circle pointer-events-none absolute justify-center <%= webhook_attempt.success? ? 'btn-success bg-success/10' : 'btn-error bg-error/10' %>" style="left: -12px;">
             <%= svg_icon(webhook_attempt.success? ? 'check' : 'x', class: 'w-4 h-4 shrink-0') %>
           </span>
           <p class="leading-none text-sm text-base-content/60 pt-1">
@@ -41,7 +41,7 @@
       <% end %>
     <% else %>
       <li class="ml-7">
-        <span class="btn btn-outline btn-xs btn-circle pointer-events-none absolute justify-center btn-info bg-blue-50" style="left: -12px;">
+        <span class="btn btn-outline btn-xs btn-circle pointer-events-none absolute justify-center btn-info bg-info/10" style="left: -12px;">
           <%= svg_icon('clock', class: 'w-4 h-4 shrink-0') %>
         </span>
         <p class="leading-none text-base-content/60 pt-1">

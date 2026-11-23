@@ -4,7 +4,7 @@
   </h1>
   <% if local_assigns[:access_error].present? %>
     <div class="alert mt-6">
-      <%= svg_icon('x_circle', class: 'w-6 h-6 text-red-500') %>
+      <%= svg_icon('x_circle', class: 'w-6 h-6 text-error') %>
       <span><%= local_assigns[:access_error] %></span>
     </div>
   <% else %>

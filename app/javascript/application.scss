@@ -140,7 +140,7 @@ button[disabled] .enabled, button.btn-disabled .enabled {
 }
 
 .autocomplete .group {
-  background: #eee;
+  background: #F5F0E3;
 }
 
 .autocomplete > div:hover:not(.group),
@@ -234,4 +234,28 @@ native-action {
   .table-stack td:last-child .btn {
     @apply btn-sm w-full;
   }
+}
+
+body .driver-popover {
+  color: #252422;
+}
+
+body .driver-popover-close-btn,
+body .driver-popover-progress-text {
+  color: #474544;
+}
+
+body .driver-popover-close-btn:hover,
+body .driver-popover-close-btn:focus {
+  color: #252422;
+}
+
+body .driver-popover-footer button {
+  color: #252422;
+  border-color: #d3cec3;
+}
+
+body .driver-popover-footer button:hover,
+body .driver-popover-footer button:focus {
+  background-color: #f5f0e3;
 }

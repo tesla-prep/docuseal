@@ -30,7 +30,7 @@
               v-for="action in group"
               :key="action.title"
               class="inline-flex items-center justify-center w-7 h-7 rounded-md"
-              :class="{ 'text-red-600': action.danger, 'bg-neutral-200': action.active, 'hover:bg-neutral-100': !action.active && !isDisabled(action), 'opacity-50 cursor-not-allowed': isDisabled(action) }"
+              :class="{ 'text-error': action.danger, 'bg-neutral-200': action.active, 'hover:bg-neutral-100': !action.active && !isDisabled(action), 'opacity-50 cursor-not-allowed': isDisabled(action) }"
               :title="action.structural && !coords.isRegular ? t('irregular_table_structure') : t(action.title)"
               :disabled="isDisabled(action)"
               @click="$emit('command', action.command, action.arg)"
@@ -48,12 +48,12 @@
     </div>
     <div
       v-if="size"
-      class="absolute top-0 left-0 border border-dashed border-blue-500"
+      class="absolute top-0 left-0 border border-dashed border-accent"
       :style="{ width: size.width + 'px', height: size.height + 'px' }"
     />
     <div
       v-if="coords.type === 'table'"
-      class="absolute w-3 h-3 bg-white border-2 border-blue-500 rounded-sm pointer-events-auto cursor-nwse-resize touch-none before:absolute before:-inset-3"
+      class="absolute w-3 h-3 bg-white border-2 border-accent rounded-sm pointer-events-auto cursor-nwse-resize touch-none before:absolute before:-inset-3"
       :style="{ left: (size?.width ?? coords.width) - 6 + 'px', top: (size?.height ?? coords.height) - 6 + 'px' }"
       :title="t('resize')"
       @pointerdown.prevent.stop="startResize"

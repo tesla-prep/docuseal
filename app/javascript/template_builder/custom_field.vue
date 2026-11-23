@@ -105,7 +105,7 @@
               >
                 <a
                   href="#"
-                  class="text-sm py-1 px-2 text-red-600"
+                  class="text-sm py-1 px-2 text-error"
                   @click.prevent="$emit('remove', field)"
                 >
                   <IconTrashX

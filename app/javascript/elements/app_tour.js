@@ -17,6 +17,7 @@ export default class extends HTMLElement {
 
     this.driverObj = driver({
       showProgress: true,
+      overlayColor: '#0d0d0d',
       nextBtnText: this.I18n.next,
       prevBtnText: this.I18n.previous,
       doneBtnText: this.I18n.done,

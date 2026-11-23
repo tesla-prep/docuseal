@@ -222,7 +222,7 @@
         <span class="text-xs text-base-content/60 ml-4">{{ isMac ? '⌘C' : 'Ctrl+C' }}</span>
       </button>
       <button
-        class="field-settings-remove w-full px-2 py-1 rounded-md hover:bg-neutral-100 flex items-center justify-between text-sm text-red-600"
+        class="field-settings-remove w-full px-2 py-1 rounded-md hover:bg-neutral-100 flex items-center justify-between text-sm text-error"
         @click.stop="$emit('delete')"
       >
         <span class="flex items-center space-x-2">
