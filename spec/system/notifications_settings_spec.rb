@@ -95,4 +95,48 @@ RSpec.describe 'Notifications Settings' do
       end
     end
   end
+
+  context 'when sign request email reminders are due' do
+    let(:template) { create(:template, account: user.account, author: user, submitter_count: 2) }
+    let(:submission) do
+      create(:submission, :with_submitters, template:, created_by_user: user, submitters_order: 'preserved')
+    end
+    let(:first_submitter) { submission.submitters.find_by(uuid: template.submitters.first['uuid']) }
+    let(:second_submitter) { submission.submitters.find_by(uuid: template.submitters.second['uuid']) }
+
+    before do
+      allow(Sidekiq).to receive(:redis).and_return('OK')
+      create(:account_config, account: user.account, key: AccountConfig::SUBMITTER_REMINDERS,
+                              value: { 'first_duration' => 'one_hour', 'second_duration' => 'two_days' })
+      create(:account_config, account: user.account, key: AccountConfig::ENFORCE_SIGNING_ORDER_KEY, value: true)
+      submission.submitters.each { |submitter| submitter.update!(sent_at: 2.hours.ago) }
+    end
+
+    it 'sends one reminder to the signer whose turn it is' do
+      expect { SendSubmitterRemindersJob.new.perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
+
+      expect(ActionMailer::Base.deliveries.last.to).to eq([first_submitter.email])
+      expect(ActionMailer::Base.deliveries.last.subject).to eq('Reminder: you are invited to sign a document')
+      expect(first_submitter.submission_events.where(event_type: 'send_reminder_email').count).to eq(1)
+      expect(second_submitter.submission_events.count).to eq(0)
+
+      expect { SendSubmitterRemindersJob.new.perform }.not_to change(ActionMailer::Base.deliveries, :count)
+    end
+
+    it 'counts every reminder from the invitation' do
+      first_submitter.update!(sent_at: 60.hours.ago)
+      create(:submission_event, submission:, submitter: first_submitter, event_type: 'send_reminder_email',
+                                event_timestamp: 1.day.ago)
+
+      expect { SendSubmitterRemindersJob.new.perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
+      expect(first_submitter.submission_events.where(event_type: 'send_reminder_email').count).to eq(2)
+    end
+
+    it 'skips signers who completed or declined' do
+      first_submitter.update!(declined_at: Time.current)
+      second_submitter.update!(completed_at: Time.current)
+
+      expect { SendSubmitterRemindersJob.new.perform }.not_to change(ActionMailer::Base.deliveries, :count)
+    end
+  end
 end

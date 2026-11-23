@@ -19,11 +19,11 @@
               <% signature.messages.each do |message| %>
                 <p class="flex space-x-1 items-center">
                   <% if message.status == :error %>
-                    <%= svg_icon('x_circle', class: 'w-6 h-6 text-red-500') %>
+                    <%= svg_icon('x_circle', class: 'w-6 h-6 text-error') %>
                   <% elsif message.status == :success %>
-                    <%= svg_icon('circle_check', class: 'w-6 h-6 text-green-500') %>
+                    <%= svg_icon('circle_check', class: 'w-6 h-6 text-success') %>
                   <% elsif message.status == :warning %>
-                    <%= svg_icon('alert_circle', class: 'w-6 h-6 text-yellow-500') %>
+                    <%= svg_icon('alert_circle', class: 'w-6 h-6 text-warning') %>
                   <% end %>
                   <span>
                     <%= message.text %>

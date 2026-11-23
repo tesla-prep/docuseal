@@ -100,7 +100,7 @@ img.ProseMirror-separator {
 }
 
 .variable-highlight {
-  background-color: #fef3c7;
+  background-color: rgba(251, 130, 88, 0.2);
   padding: 1px 2px;
   border-radius: 4px;
 }

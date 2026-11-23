@@ -114,7 +114,7 @@
           <div
             ref="textContainer"
             class="flex items-center px-0.5"
-            :style="{ color: isConditionMatch ? field.preferences?.color : '#9ca3af' }"
+            :style="{ color: isConditionMatch ? field.preferences?.color : '#474544' }"
             :class="{ 'w-full h-full': isWFullType }"
           >
             <IconCheck

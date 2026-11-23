@@ -165,7 +165,7 @@ export default targetable(class extends HTMLElement {
         EditorView.theme({
           '&': {
             backgroundColor: 'white',
-            color: 'black',
+            color: '#252422',
             fontSize: '14px',
             fontFamily: 'monospace'
           },

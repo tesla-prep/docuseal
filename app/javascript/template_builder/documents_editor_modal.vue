@@ -170,7 +170,7 @@
                     <hr class="my-1 border-neutral-200">
                     <li>
                       <button
-                        class="w-full px-2 py-1 rounded-md hover:bg-neutral-100 flex items-center space-x-2 text-sm text-red-600"
+                        class="w-full px-2 py-1 rounded-md hover:bg-neutral-100 flex items-center space-x-2 text-sm text-error"
                         @click.stop="removeDocument(docIndex); closeDropdown()"
                       >
                         <IconTrashX class="w-4 h-4" />
@@ -342,7 +342,7 @@
                 </span>
               </button>
               <button
-                class="btn btn-sm normal-case font-normal rounded disabled:bg-base-300 text-red-600 flex-col gap-1 h-auto min-h-0 py-2 px-1 text-xs leading-tight whitespace-normal md:flex-row md:gap-2 md:h-8 md:min-h-[2rem] md:py-0 md:px-3 md:text-sm md:whitespace-nowrap md:w-full md:justify-start"
+                class="btn btn-sm normal-case font-normal rounded disabled:bg-base-300 text-error flex-col gap-1 h-auto min-h-0 py-2 px-1 text-xs leading-tight whitespace-normal md:flex-row md:gap-2 md:h-8 md:min-h-[2rem] md:py-0 md:px-3 md:text-sm md:whitespace-nowrap md:w-full md:justify-start"
                 :disabled="!selectedPageId"
                 @click.prevent="removePage"
               >

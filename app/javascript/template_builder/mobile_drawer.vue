@@ -8,7 +8,7 @@
     :class="{ 'pointer-events-none': !open }"
   >
     <div
-      class="absolute inset-0 bg-black transition-opacity duration-300"
+      class="absolute inset-0 bg-neutral-900 transition-opacity duration-300"
       :class="open ? 'opacity-25' : 'opacity-0'"
       @click="$emit('close')"
       @dragenter="$emit('close')"

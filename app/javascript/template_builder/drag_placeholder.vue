@@ -36,7 +36,7 @@
       <span
         v-if="isRequired"
         :data-tip="t('required')"
-        class="text-red-400 text-3xl pr-1.5 tooltip tooltip-left h-8"
+        class="text-error text-3xl pr-1.5 tooltip tooltip-left h-8"
       >
         *
       </span>

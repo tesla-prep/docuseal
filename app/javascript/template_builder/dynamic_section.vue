@@ -6,7 +6,7 @@
   >
     <div
       v-if="isDrawMode && editable && cursorHighlightCoords"
-      class="absolute pointer-events-none z-10 bg-black"
+      class="absolute pointer-events-none z-10 bg-base-content"
       :style="{ width: '1px', height: cursorHighlightCoords.height + 'px', left: cursorHighlightCoords.x + 'px', top: cursorHighlightCoords.y + 'px' }"
     />
     <div

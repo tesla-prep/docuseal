@@ -113,7 +113,7 @@ img.ProseMirror-separator {
   width: var(--handle-size);
   height: var(--handle-size);
   background: #ffffff;
-  border: calc(2px / var(--zoom)) solid #3b82f6;
+  border: calc(2px / var(--zoom)) solid #F0531C;
   border-radius: 2px;
   z-index: 1;
 }
@@ -127,7 +127,7 @@ img.ProseMirror-separator {
 }
 
 .ProseMirror-selectednode [data-resize-wrapper] {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid #F0531C;
 }
 
 .ProseMirror-selectednode [data-resize-handle] {
@@ -153,12 +153,12 @@ img.ProseMirror-separator {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(240, 83, 28, 0.15);
   pointer-events: none;
 }
 
 dynamic-variable {
-  background-color: #fef3c7;
+  background-color: rgba(251, 130, 88, 0.2);
   word-break: break-all;
   overflow-wrap: anywhere;
 }
@@ -1707,7 +1707,7 @@ export function buildEditor ({ dynamicAreaProps, getAttachmentsIndex, renderHtml
     const isColumn = target.type === 'column'
     const guide = document.createElement('div')
 
-    guide.style.cssText = `position: fixed; z-index: 9999; pointer-events: none; background: #3b82f6; ${isColumn ? `top: ${tableRect.top}px; height: ${tableRect.height}px; width: 1px;` : `left: ${tableRect.left}px; width: ${tableRect.width}px; height: 1px;`}`
+    guide.style.cssText = `position: fixed; z-index: 9999; pointer-events: none; background: #F0531C; ${isColumn ? `top: ${tableRect.top}px; height: ${tableRect.height}px; width: 1px;` : `left: ${tableRect.left}px; width: ${tableRect.width}px; height: 1px;`}`
 
     const moveGuide = (e) => {
       if (isColumn) {
