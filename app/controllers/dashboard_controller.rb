@@ -4,7 +4,7 @@ class DashboardController < ApplicationController
   skip_before_action :authenticate_user!, only: %i[index]
 
   before_action :maybe_redirect_product_url
-  before_action :maybe_render_landing
+  before_action :maybe_redirect_to_sign_in
   before_action :maybe_redirect_mfa_setup
 
   skip_authorization_check
@@ -36,9 +36,9 @@ class DashboardController < ApplicationController
     redirect_to mfa_setup_path, notice: I18n.t('setup_2fa_to_continue')
   end
 
-  def maybe_render_landing
+  def maybe_redirect_to_sign_in
     return if signed_in?
 
-    render 'pages/landing'
+    redirect_to new_user_session_path
   end
 end

@@ -8,6 +8,13 @@ RSpec.describe 'Sign In' do
     visit new_user_session_path
   end
 
+  it 'opens the sign-in page instead of the landing page at the root when signed out' do
+    visit root_path
+
+    expect(page).to have_current_path(new_user_session_path)
+    expect(page).not_to have_content('Run on your own host')
+  end
+
   context 'when only with email and password' do
     it 'signs in successfully with valid email and password' do
       fill_in 'Email', with: 'john.dou@example.com'
