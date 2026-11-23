@@ -427,6 +427,29 @@ RSpec.describe 'Signing Form' do
     end
   end
 
+  context 'when signing order is enforced for the account' do
+    let(:template) { create(:template, account:, author:, submitter_count: 2, only_field_types: %w[text]) }
+
+    before { create(:account_config, account:, key: AccountConfig::ENFORCE_SIGNING_ORDER_KEY, value: true) }
+
+    it 'opens the form for the second signer of a submission sent to everyone at once' do
+      submission = create(:submission, :with_submitters, template:, submitters_order: 'random')
+
+      visit submit_form_path(slug: submission.submitters.find_by(uuid: template.submitters.second['uuid']).slug)
+
+      expect(page).to have_field('First Name')
+      expect(page).not_to have_content('Awaiting completion by the other party')
+    end
+
+    it 'makes the second signer of a submission sent in order wait' do
+      submission = create(:submission, :with_submitters, template:, submitters_order: 'preserved')
+
+      visit submit_form_path(slug: submission.submitters.find_by(uuid: template.submitters.second['uuid']).slug)
+
+      expect(page).to have_content('Awaiting completion by the other party')
+    end
+  end
+
   context 'when the text step' do
     let(:template) { create(:template, account:, author:, only_field_types: %w[text]) }
     let(:submission) { create(:submission, template:) }
