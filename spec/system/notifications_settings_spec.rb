@@ -123,7 +123,7 @@ RSpec.describe 'Notifications Settings' do
     end
 
     it 'counts every reminder from the invitation' do
-      first_submitter.update!(sent_at: 3.days.ago)
+      first_submitter.update!(sent_at: 60.hours.ago)
       create(:submission_event, submission:, submitter: first_submitter, event_type: 'send_reminder_email',
                                 event_timestamp: 1.day.ago)
 
