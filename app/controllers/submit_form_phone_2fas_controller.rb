@@ -9,15 +9,16 @@ class SubmitFormPhone2fasController < ApplicationController
   skip_authorization_check
 
   before_action :load_submitter
+  before_action :redirect_unless_code_expected
 
   def create
     RateLimit.call("verify-phone-2fa-code-#{@submitter.id}", limit: 2, ttl: 45.seconds, enabled: true)
 
-    if OtpChallenges.verify(params[:one_time_code].to_s.gsub(/\D/, ''), otp_value, purpose: OTP_PURPOSE)
+    if OtpChallenges.verify(params[:one_time_code].to_s.gsub(/\D/, ''), phone_2fa_key, purpose: OTP_PURPOSE)
       SubmissionEvents.create_with_tracking_data(@submitter, 'phone_verified', request, { phone: @submitter.phone })
 
-      cookies.encrypted[:phone_2fa_slug] =
-        { value: @submitter.slug, expires: Submitters::StartForm::COOKIES_TTL.from_now,
+      cookies.encrypted[:phone_2fa] =
+        { value: phone_2fa_key, expires: Submitters::StartForm::COOKIES_TTL.from_now,
           **Submitters::StartForm::COOKIES_DEFAULTS }
 
       redirect_to submit_form_path(@submitter.slug, lang:)
@@ -37,7 +38,7 @@ class SubmitFormPhone2fasController < ApplicationController
 
     RateLimit.call("send-phone-code-#{@submitter.id}", limit: 2, ttl: 45.seconds, enabled: true)
 
-    code = OtpChallenges.generate(otp_value, purpose: OTP_PURPOSE)
+    code = OtpChallenges.generate(phone_2fa_key, purpose: OTP_PURPOSE)
 
     TwilioSms.deliver(@submitter.phone, I18n.t(:verification_code_sms_body).sub('{code}', code))
 
@@ -64,8 +65,18 @@ class SubmitFormPhone2fasController < ApplicationController
     @submitter = Submitter.find_by!(slug: params[:submitter_slug])
   end
 
-  def otp_value
-    [@submitter.phone, @submitter.slug].join(':')
+  def redirect_unless_code_expected
+    submission = @submitter.submission
+
+    return if Submitters::AuthorizedForForm.phone_2fa_required?(@submitter) && @submitter.phone.present? &&
+              !@submitter.completed_at? && !@submitter.declined_at? && !submission.completed_at? &&
+              !submission.archived_at? && !submission.expired? && !submission.template&.archived_at?
+
+    redirect_to submit_form_path(@submitter.slug, lang:)
+  end
+
+  def phone_2fa_key
+    Submitters::AuthorizedForForm.phone_2fa_key(@submitter)
   end
 
   def lang

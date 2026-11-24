@@ -10,6 +10,7 @@ class SendSubmitterInvitationSmsJob
     return if submitter.completed_at? || submitter.declined_at?
     return if submitter.submission.archived_at? || submitter.submission.expired?
     return if submitter.template&.archived_at?
+    return unless turn_has_come?(submitter)
 
     TwilioSms.deliver(submitter.phone, build_body(submitter))
 
@@ -20,6 +21,14 @@ class SendSubmitterInvitationSmsJob
   end
 
   private
+
+  def turn_has_come?(submitter)
+    submission = submitter.submission
+    in_order = submission.submitters_order_preserved? ||
+               (submission.template_submitters || []).any? { |s| s['order'] }
+
+    !in_order || Submitters.current_submitter_order?(submitter)
+  end
 
   def build_body(submitter)
     key = submitter.viewer? ? 'submitter_invitation_sms_body_view' : 'submitter_invitation_sms_body_sign'

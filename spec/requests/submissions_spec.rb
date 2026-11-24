@@ -219,6 +219,21 @@ describe 'Submission API' do
     end
   end
 
+  describe 'POST /api/submissions with phone 2FA' do
+    it 'refuses a signer without a phone when phone 2FA is required' do
+      post '/api/submissions', headers: { 'x-auth-token': author.access_token.token }, params: {
+        template_id: multiple_submitters_template.id,
+        require_phone_2fa: true,
+        submitters: [{ role: 'First Party', email: 'john.doe@example.com', phone: '+12145550100' },
+                     { email: 'jane.doe@example.com' }]
+      }.to_json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.parsed_body['error']).to eq('Phone 2FA needs a phone number for jane.doe@example.com')
+      expect(Submission.count).to eq(0)
+    end
+  end
+
   describe 'POST /api/submissions/emails' do
     it 'creates a submission using email' do
       post '/api/submissions/emails', headers: { 'x-auth-token': author.access_token.token }, params: {

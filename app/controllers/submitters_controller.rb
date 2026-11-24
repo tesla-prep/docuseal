@@ -35,6 +35,8 @@ class SubmittersController < ApplicationController
       @submitter.preferences['email_message_uuid'] = submitter_preferences['email_message_uuid']
     end
 
+    @submitter.preferences['send_sms'] = true if params[:send_sms] == '1'
+
     assign_submitter_attrs(@submitter, submitter_params)
 
     if @submitter.save

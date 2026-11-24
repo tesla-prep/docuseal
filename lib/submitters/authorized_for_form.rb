@@ -44,11 +44,18 @@ module Submitters
 
     def pass_phone_2fa?(submitter, request)
       return false unless submitter
+      return true unless phone_2fa_required?(submitter)
 
-      return true if submitter.submission.template&.preferences&.dig('require_phone_2fa') != true &&
-                     submitter.preferences['require_phone_2fa'] != true
+      request.cookie_jar.encrypted[:phone_2fa] == phone_2fa_key(submitter)
+    end
 
-      request.cookie_jar.encrypted[:phone_2fa_slug] == submitter.slug
+    def phone_2fa_required?(submitter)
+      submitter.submission.template&.preferences&.dig('require_phone_2fa') == true ||
+        submitter.preferences['require_phone_2fa'] == true
+    end
+
+    def phone_2fa_key(submitter)
+      [submitter.slug, submitter.phone].join(':')
     end
 
     def pass_link_2fa?(submitter, current_user, request)

@@ -35,6 +35,16 @@ RSpec.describe SendSubmitterInvitationSmsJob do
     expect(first_submitter.reload.sent_at).to be_present
   end
 
+  it 'does not text a signer whose turn has not come, even when started by hand' do
+    stub_const('ENV', ENV.to_h.merge(twilio_env))
+    twilio = stub_request(:post, /api\.twilio\.com/)
+
+    described_class.new.perform('submitter_id' => second_submitter.id)
+
+    expect(twilio).not_to have_been_requested
+    expect(second_submitter.reload.sent_at).to be_nil
+  end
+
   it 'does not text when Twilio is not configured' do
     twilio = stub_request(:post, /api\.twilio\.com/)
 
