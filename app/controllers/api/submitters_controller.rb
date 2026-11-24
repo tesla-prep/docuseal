@@ -131,7 +131,7 @@ module Api
         values[f['uuid']].present? && f['type'] == 'phone'
       end&.dig('uuid')
 
-      submitter.email = Submissions.normalize_email(attrs[:email]) if attrs.key?(:email)
+      submitter.email = Submissions.normalize_email(attrs[:email], fix_typos: false) if attrs.key?(:email)
       submitter.name = attrs[:name] if attrs.key?(:name)
 
       if attrs.key?(:phone)

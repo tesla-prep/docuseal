@@ -206,11 +206,13 @@ module Submissions
     end
   end
 
-  def normalize_email(email)
+  def normalize_email(email, fix_typos: true)
     return if email.blank?
     return if email.is_a?(Numeric)
 
     email = email.to_s.tr('/', ',')
+
+    return email.downcase unless fix_typos
 
     return email.downcase.sub(/@gmail?\z/i, '@gmail.com') if email.match?(/@gmail?\z/i)
 
