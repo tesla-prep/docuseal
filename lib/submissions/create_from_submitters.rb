@@ -235,7 +235,7 @@ module Submissions
 
         build_submitter(submission:, attrs:, uuid:, user:, params:,
                         is_order_sent: submitters_order == 'random',
-                        preferences: preferences.except('email_message_uuid'))
+                        preferences: preferences.except('email_message_uuid', 'require_phone_2fa'))
       end
     end
 

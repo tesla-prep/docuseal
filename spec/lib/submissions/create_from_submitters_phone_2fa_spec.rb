@@ -28,6 +28,22 @@ RSpec.describe Submissions::CreateFromSubmitters do
     expect(Submitters::AuthorizedForForm.phone_2fa_required?(cc)).to be(false)
   end
 
+  it 'keeps an explicit phone 2FA on a view-only role' do
+    viewer_uuid = SecureRandom.uuid
+    template.update!(submitters: template.submitters + [{ 'name' => 'Viewer', 'uuid' => viewer_uuid }])
+
+    submissions = create_submissions([{ submitters: [
+                                       { uuid:, email: 'signer@example.com', phone: '+12145550100' },
+                                       { uuid: viewer_uuid, email: 'viewer@example.com', phone: '+12145550101',
+                                         require_phone_2fa: true }
+                                     ] }], require_phone_2fa: '0')
+
+    viewer = submissions.first.submitters.find { |s| s.email == 'viewer@example.com' }
+
+    expect(viewer.viewer?).to be(true)
+    expect(Submitters::AuthorizedForForm.phone_2fa_required?(viewer)).to be(true)
+  end
+
   it 'saves no submission of a batch when one signer has no phone' do
     expect do
       create_submissions([{ submitters: [{ uuid:, email: 'first@example.com', phone: '+12145550100' }] },
