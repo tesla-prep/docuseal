@@ -50,8 +50,11 @@ module Submitters
     end
 
     def phone_2fa_required?(submitter)
-      submitter.submission.template&.preferences&.dig('require_phone_2fa') == true ||
-        submitter.preferences['require_phone_2fa'] == true
+      return submitter.preferences['require_phone_2fa'] == true if submitter.preferences.key?('require_phone_2fa')
+      return false if submitter.viewer?
+
+      submitter.submission.preferences['require_phone_2fa'] == true ||
+        submitter.submission.template&.preferences&.dig('require_phone_2fa') == true
     end
 
     def phone_2fa_code_allowed?(submitter)

@@ -44,6 +44,22 @@ RSpec.describe Submissions::CreateFromSubmitters do
     expect(Submitters::AuthorizedForForm.phone_2fa_required?(viewer)).to be(true)
   end
 
+  it 'does not ask a view-only role for a phone under the shared flag' do
+    viewer_uuid = SecureRandom.uuid
+    template.update!(submitters: template.submitters + [{ 'name' => 'Viewer', 'uuid' => viewer_uuid }])
+
+    submissions = create_submissions([{ submitters: [
+                                       { uuid:, email: 'signer@example.com', phone: '+12145550100' },
+                                       { uuid: viewer_uuid, email: 'viewer@example.com' }
+                                     ] }])
+
+    signer, viewer = submissions.first.submitters.partition { |s| s.email == 'signer@example.com' }.map(&:first)
+
+    expect(Submitters::AuthorizedForForm.phone_2fa_required?(signer)).to be(true)
+    expect(viewer.viewer?).to be(true)
+    expect(Submitters::AuthorizedForForm.phone_2fa_required?(viewer)).to be(false)
+  end
+
   it 'saves no submission of a batch when one signer has no phone' do
     expect do
       create_submissions([{ submitters: [{ uuid:, email: 'first@example.com', phone: '+12145550100' }] },

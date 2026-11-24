@@ -15,7 +15,7 @@ module Submissions
         submission_preferences = Submitters.normalize_preferences(user.account, user, attrs)
         submission_preferences = preferences.merge(submission_preferences)
 
-        set_submission_preferences = submission_preferences.slice('send_email', 'bcc_completed')
+        set_submission_preferences = submission_preferences.slice('send_email', 'bcc_completed', 'require_phone_2fa')
         set_submission_preferences['send_email'] = true if params['send_completed_email']
         expire_at = attrs[:expire_at] || Templates.build_default_expire_at(template)
 
@@ -235,7 +235,7 @@ module Submissions
 
         build_submitter(submission:, attrs:, uuid:, user:, params:,
                         is_order_sent: submitters_order == 'random',
-                        preferences: preferences.except('email_message_uuid', 'require_phone_2fa'))
+                        preferences: preferences.except('email_message_uuid'))
       end
     end
 
@@ -442,7 +442,7 @@ module Submissions
           completed_at: attrs[:completed].present? ? Time.current : nil,
           values: values.except(phone_field_uuid),
           metadata: attrs[:metadata] || {},
-          preferences: preferences.merge(submitter_preferences)
+          preferences: preferences.except('require_phone_2fa').merge(submitter_preferences)
                                   .merge({ default_values: attrs[:values] }.compact_blank)
                                   .except('bcc_completed'),
           uuid:

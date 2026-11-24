@@ -122,19 +122,20 @@ module Submissions
                                             account_id: user.account_id,
                                             source:,
                                             expire_at:,
+                                            preferences: preferences.slice('require_phone_2fa'),
                                             template_submitters: template.submitters)
 
       submitter = submission.submitters.new(email: normalize_email(email),
                                             uuid: template.submitters.first['uuid'],
                                             account_id: user.account_id,
-                                            preferences:,
+                                            preferences: preferences.except('require_phone_2fa'),
                                             sent_at: mark_as_sent ? Time.current : nil)
-
-      raise Submissions::CreateFromSubmitters::BaseError, submitter.phone_2fa_error if submitter.phone_2fa_error
 
       Submissions::CreateFromSubmitters.maybe_set_dynamic_documents(submission)
 
       Submissions::CreateFromSubmitters.assign_submitters_is_viewer(submission)
+
+      raise Submissions::CreateFromSubmitters::BaseError, submitter.phone_2fa_error if submitter.phone_2fa_error
 
       submission.save!
 

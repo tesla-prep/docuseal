@@ -54,7 +54,7 @@ class SubmissionsPreviewDownloadController < ApplicationController
 
   def use_2fa?(submission)
     return true if submission.submitters.any? do |e|
-      e.preferences['require_phone_2fa'] || e.preferences['require_email_2fa']
+      Submitters::AuthorizedForForm.phone_2fa_required?(e) || e.preferences['require_email_2fa']
     end
     return true if submission.template&.preferences&.dig('require_phone_2fa')
     return true if submission.template&.preferences&.dig('require_email_2fa')
