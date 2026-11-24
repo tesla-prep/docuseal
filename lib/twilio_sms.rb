@@ -21,8 +21,14 @@ module TwilioSms
       'Content-Type' => 'application/x-www-form-urlencoded'
     )
 
-    raise Error, "Twilio answered HTTP #{response.status}: #{response.body}" unless response.success?
+    raise Error, "Twilio answered HTTP #{response.status}, code #{error_code(response.body)}" unless response.success?
 
     response
+  end
+
+  def error_code(body)
+    JSON.parse(body.to_s)['code']
+  rescue JSON::ParserError, TypeError
+    nil
   end
 end
