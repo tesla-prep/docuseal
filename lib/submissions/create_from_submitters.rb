@@ -420,7 +420,7 @@ module Submissions
     end
 
     def build_submitter(submission:, attrs:, uuid:, is_order_sent:, user:, preferences:, params:)
-      email = Submissions.normalize_email(attrs[:email], fix_typos: !submission.source_api?)
+      email = Submissions.normalize_email(attrs[:email], fix_typos: !Submissions.exact_email_source?(submission))
       submitter_preferences = Submitters.normalize_preferences(submission.account, user,
                                                                attrs.merge(submitter_message_preferences(uuid, params)))
       values = attrs[:values] || {}

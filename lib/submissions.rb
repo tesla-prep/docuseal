@@ -124,7 +124,7 @@ module Submissions
                                             expire_at:,
                                             template_submitters: template.submitters)
 
-      submission.submitters.new(email: normalize_email(email),
+      submission.submitters.new(email: normalize_email(email, fix_typos: !exact_email_source?(submission)),
                                 uuid: template.submitters.first['uuid'],
                                 account_id: user.account_id,
                                 preferences:,
@@ -204,6 +204,11 @@ module Submissions
 
       viewers << submitter if submitter&.viewer?
     end
+  end
+
+  # API and MCP callers show the address before sending, so it is kept as given (lower case), without the typo fix.
+  def exact_email_source?(submission)
+    submission.source_api? || submission.source_mcp?
   end
 
   def normalize_email(email, fix_typos: true)
