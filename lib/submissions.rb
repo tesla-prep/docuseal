@@ -206,7 +206,8 @@ module Submissions
     end
   end
 
-  # API and MCP callers show the address before sending, so it is kept as given (lower case), without the typo fix.
+  # API and MCP callers show the address before sending, so it is kept as given (lower case), without the typo fix;
+  # an address DocuSeal would split into several (/ or ,) is refused.
   def exact_email_source?(submission)
     submission.source_api? || submission.source_mcp?
   end
@@ -215,9 +216,15 @@ module Submissions
     return if email.blank?
     return if email.is_a?(Numeric)
 
-    email = email.to_s.tr('/', ',')
+    unless fix_typos
+      if email.to_s.match?(%r{[/,]})
+        raise Submissions::CreateFromSubmitters::BaseError, "Invalid email: #{email}. Give one address without / or ,"
+      end
 
-    return email.downcase unless fix_typos
+      return email.to_s.downcase
+    end
+
+    email = email.to_s.tr('/', ',')
 
     return email.downcase.sub(/@gmail?\z/i, '@gmail.com') if email.match?(/@gmail?\z/i)
 
