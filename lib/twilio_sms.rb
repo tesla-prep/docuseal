@@ -21,14 +21,19 @@ module TwilioSms
       'Content-Type' => 'application/x-www-form-urlencoded'
     )
 
-    raise Error, "Twilio answered HTTP #{response.status}, code #{error_code(response.body)}" unless response.success?
+    unless response.success?
+      code = error_code(response.body)
+      raise Error, "Twilio answered HTTP #{response.status}#{", code #{code}" if code}"
+    end
 
     response
   end
 
   def error_code(body)
-    JSON.parse(body.to_s)['code']
-  rescue JSON::ParserError, TypeError
+    parsed = JSON.parse(body.to_s)
+    code = parsed['code'] if parsed.is_a?(Hash)
+    code if code.is_a?(Integer)
+  rescue JSON::ParserError
     nil
   end
 end
