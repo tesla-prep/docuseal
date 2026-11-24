@@ -7,6 +7,8 @@ class SendSubmitterRemindersJob
 
   INTERVAL = 10.minutes
 
+  TWILIO_ENV = %w[TWILIO_ACCOUNT_SID TWILIO_API_KEY_SID TWILIO_API_KEY_SECRET TWILIO_MESSAGING_SERVICE_SID].freeze
+
   def perform
     lock_seconds = (INTERVAL - 1.minute).to_i
 
@@ -50,7 +52,27 @@ class SendSubmitterRemindersJob
     mail.deliver_now!
 
     SubmissionEvent.create!(submitter:, event_type: 'send_reminder_email')
+
+    send_sms_reminder(submitter) if submitter.phone.present? && ENV.values_at(*TWILIO_ENV).all?(&:present?)
   rescue StandardError => e
     Rails.logger.error("Submitter reminder #{submitter.id} failed: #{e.message}")
+  end
+
+  def send_sms_reminder(submitter)
+    name = submitter.submission.name || submitter.submission.template&.name
+    link = Rails.application.routes.url_helpers.submit_form_url(slug: submitter.slug, **Docuseal.default_url_options)
+    credentials = "#{ENV.fetch('TWILIO_API_KEY_SID')}:#{ENV.fetch('TWILIO_API_KEY_SECRET')}"
+
+    response = Faraday.post(
+      "https://api.twilio.com/2010-04-01/Accounts/#{ENV.fetch('TWILIO_ACCOUNT_SID')}/Messages.json",
+      URI.encode_www_form(To: submitter.phone, MessagingServiceSid: ENV.fetch('TWILIO_MESSAGING_SERVICE_SID'),
+                          Body: "CIRQLE: reminder to sign \"#{name}\": #{link}"),
+      'Authorization' => "Basic #{Base64.strict_encode64(credentials)}",
+      'Content-Type' => 'application/x-www-form-urlencoded'
+    )
+
+    raise "Twilio answered HTTP #{response.status}: #{response.body}" unless response.success?
+
+    SubmissionEvent.create!(submitter:, event_type: 'send_sms')
   end
 end
