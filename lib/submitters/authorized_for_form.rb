@@ -8,6 +8,7 @@ module Submitters
 
     def call(submitter, current_user, request, with_order: false)
       pass_email_2fa?(submitter, request) &&
+        pass_phone_2fa?(submitter, request) &&
         pass_link_2fa?(submitter, current_user, request) &&
         (!with_order || pass_submitters_order?(submitter))
     end
@@ -39,6 +40,29 @@ module Submitters
                      Submitter.signed_id_verifier.verified(token, purpose: :email_two_factor) == submitter.slug
 
       false
+    end
+
+    def pass_phone_2fa?(submitter, request)
+      return false unless submitter
+      return true unless phone_2fa_required?(submitter)
+
+      request.cookie_jar.encrypted[:phone_2fa] == phone_2fa_key(submitter)
+    end
+
+    def phone_2fa_required?(submitter)
+      submitter.preferences['require_phone_2fa'] == true
+    end
+
+    def phone_2fa_code_allowed?(submitter)
+      submission = submitter.submission
+
+      phone_2fa_required?(submitter) && submitter.phone.present? && !submitter.declined_at? &&
+        !submitter.account.archived_at? && !submission.archived_at? && !submission.expired? &&
+        !submission.template&.archived_at?
+    end
+
+    def phone_2fa_key(submitter)
+      [submitter.slug, submitter.phone].join(':')
     end
 
     def pass_link_2fa?(submitter, current_user, request)

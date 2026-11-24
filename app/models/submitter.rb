@@ -72,6 +72,8 @@ class Submitter < ApplicationRecord
 
   before_validation :set_template_id, on: :create
 
+  validate :validate_phone_2fa, if: -> { new_record? || will_save_change_to_phone? || will_save_change_to_preferences? }
+
   after_destroy :anonymize_email_events, if: -> { Docuseal.multitenant? }
 
   def status
@@ -126,6 +128,15 @@ class Submitter < ApplicationRecord
     submission.template_submitters.any? { |s| s['uuid'] == uuid && s['is_viewer'] }
   end
 
+  def phone_2fa_error
+    return unless Submitters::AuthorizedForForm.phone_2fa_required?(self)
+    return "Phone 2FA needs a phone number for #{name || email || 'every recipient'}" if phone.blank?
+
+    newly_required = new_record? || preferences_was.to_h['require_phone_2fa'] != true
+
+    'Phone 2FA needs SMS (Twilio) to be configured' if newly_required && !TwilioSms.configured?
+  end
+
   private
 
   def set_template_id
@@ -136,5 +147,11 @@ class Submitter < ApplicationRecord
     email_events.each do |event|
       event.update!(email: Digest::MD5.base64digest(event.email))
     end
+  end
+
+  def validate_phone_2fa
+    error = phone_2fa_error
+
+    errors.add(:base, error) if error
   end
 end

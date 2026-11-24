@@ -71,7 +71,7 @@ module Api
 
         ProcessSubmitterCompletionJob.perform_async('submitter_id' => @submitter.id, 'is_last' => is_last)
       elsif normalized_params[:send_email] || normalized_params[:send_sms]
-        Submitters.send_signature_requests([@submitter])
+        send_requested_invitations(@submitter, normalized_params)
       end
 
       SearchEntries.enqueue_reindex(@submitter)
@@ -79,7 +79,7 @@ module Api
       render json: Submitters::SerializeForApi.call(@submitter, with_template: false, with_urls: true,
                                                                 with_events: false, params:)
     rescue Submitters::NormalizeValues::BaseError, Submitters::SubmitValues::ValidationError,
-           DownloadUtils::UnableToDownload => e
+           DownloadUtils::UnableToDownload, ActiveRecord::RecordInvalid => e
       Rollbar.warning(e) if defined?(Rollbar)
 
       render json: { error: e.message }, status: :unprocessable_content
@@ -213,6 +213,11 @@ module Api
     def assign_submission_fields(submission)
       submission.template_fields ||= submission.template.fields
       submission.template_schema ||= submission.template.schema
+    end
+
+    def send_requested_invitations(submitter, attrs)
+      Submitters.send_signature_requests([submitter], email: attrs[:send_email].in?(Submitters::TRUE_VALUES),
+                                                      sms: attrs[:send_sms].in?(Submitters::TRUE_VALUES))
     end
 
     def assign_preferences(submitter, attrs)

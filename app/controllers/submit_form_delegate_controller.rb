@@ -5,6 +5,7 @@ class SubmitFormDelegateController < ApplicationController
   skip_authorization_check
 
   before_action :load_submitter
+  before_action :refuse_phone_2fa_submitter
 
   def create
     return redirect_to submit_form_path(@submitter.slug) if @submitter.declined_at? ||
@@ -46,5 +47,11 @@ class SubmitFormDelegateController < ApplicationController
 
   def load_submitter
     @submitter = Submitter.find_by!(slug: params[:submit_form_slug])
+  end
+
+  def refuse_phone_2fa_submitter
+    return unless Submitters::AuthorizedForForm.phone_2fa_required?(@submitter)
+
+    redirect_to submit_form_path(@submitter.slug), alert: I18n.t(:phone_2fa_document_cannot_be_delegated)
   end
 end

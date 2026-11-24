@@ -48,9 +48,14 @@ class StartFormResubmitController < ApplicationController
   private
 
   def find_or_initialize_submitter(template, resubmit_submitter)
-    Submitters::StartForm.build_submitters_scope(template, exclude_completed: true)
-                         .find_by(slug: cookies.encrypted[:start_form_slug],
-                                  email: resubmit_submitter.email) || Submitter.new
+    draft = Submitters::StartForm.build_submitters_scope(template, exclude_completed: true)
+                                 .find_by(slug: cookies.encrypted[:start_form_slug], email: resubmit_submitter.email)
+
+    return Submitter.new unless draft
+    return Submitter.new if Submitters::AuthorizedForForm.phone_2fa_required?(resubmit_submitter) &&
+                            !Submitters::AuthorizedForForm.phone_2fa_required?(draft)
+
+    draft
   end
 
   def load_resubmit_submitter

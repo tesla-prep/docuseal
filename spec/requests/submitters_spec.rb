@@ -110,6 +110,23 @@ describe 'Submitter API' do
       expect(submitter.status).to eq('completed')
       expect(submitter.completed_at).not_to be_nil
     end
+
+    it 'resends only the channel that was asked for' do
+      stub_const('ENV', ENV.to_h.merge('TWILIO_ACCOUNT_SID' => 'AC0', 'TWILIO_API_KEY_SID' => 'SK0',
+                                       'TWILIO_API_KEY_SECRET' => 'secret', 'TWILIO_MESSAGING_SERVICE_SID' => 'MG0'))
+
+      submission = create(:submission, :with_submitters, template: templates[0], created_by_user: author)
+      submitter = submission.submitters.first
+      submitter.update!(phone: '+12145550100', preferences: submitter.preferences.merge('send_sms' => true))
+
+      put "/api/submitters/#{submitter.id}", headers: { 'x-auth-token': author.access_token.token }, params: {
+        send_email: true
+      }.to_json
+
+      expect(response).to have_http_status(:ok)
+      expect(SendSubmitterInvitationEmailJob.jobs.size).to eq(1)
+      expect(SendSubmitterInvitationSmsJob.jobs).to be_empty
+    end
   end
 
   private

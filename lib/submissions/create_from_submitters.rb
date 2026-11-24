@@ -96,10 +96,17 @@ module Submissions
 
         assign_submitters_is_viewer(submission)
 
+        assign_shared_phone_2fa(submission, submission_preferences['require_phone_2fa'])
+
+        phone_2fa_error = submission.submitters.lazy.filter_map(&:phone_2fa_error).first
+        raise BaseError, phone_2fa_error if phone_2fa_error
+
         submission.template = nil unless with_template
 
-        submission.tap(&:save!)
+        submission
       end
+
+      ApplicationRecord.transaction { submissions.each(&:save!) }
 
       maybe_enqueue_expire_at(submissions)
 
@@ -176,6 +183,16 @@ module Submissions
       end
 
       submission
+    end
+
+    def assign_shared_phone_2fa(submission, required)
+      return unless required
+
+      submission.submitters.each do |submitter|
+        next if submitter.viewer? || submitter.preferences.key?('require_phone_2fa')
+
+        submitter.preferences['require_phone_2fa'] = true
+      end
     end
 
     def maybe_enqueue_expire_at(submissions)
@@ -437,7 +454,7 @@ module Submissions
           completed_at: attrs[:completed].present? ? Time.current : nil,
           values: values.except(phone_field_uuid),
           metadata: attrs[:metadata] || {},
-          preferences: preferences.merge(submitter_preferences)
+          preferences: preferences.except('require_phone_2fa').merge(submitter_preferences)
                                   .merge({ default_values: attrs[:values] }.compact_blank)
                                   .except('bcc_completed'),
           uuid:
