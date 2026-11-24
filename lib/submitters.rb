@@ -183,11 +183,11 @@ module Submitters
     submitter.values.except(*field_uuids)
   end
 
-  def send_signature_requests(submitters, delay_seconds: nil)
+  def send_signature_requests(submitters, delay_seconds: nil, email: true, sms: true)
     submitters.each_with_index do |submitter, index|
       next if submitter.declined_at?
 
-      invitation_jobs(submitter).each do |job|
+      invitation_jobs(submitter, email:, sms:).each do |job|
         if delay_seconds
           job.perform_in((delay_seconds + index).seconds, 'submitter_id' => submitter.id)
         else
@@ -197,10 +197,11 @@ module Submitters
     end
   end
 
-  def invitation_jobs(submitter)
+  def invitation_jobs(submitter, email: true, sms: true)
     [
-      (SendSubmitterInvitationEmailJob if submitter.email.present? && submitter.preferences['send_email'] != false),
-      (SendSubmitterInvitationSmsJob if submitter.phone.present? && submitter.preferences['send_sms'] == true &&
+      (SendSubmitterInvitationEmailJob if email && submitter.email.present? &&
+                                          submitter.preferences['send_email'] != false),
+      (SendSubmitterInvitationSmsJob if sms && submitter.phone.present? && submitter.preferences['send_sms'] == true &&
                                         TwilioSms.configured?)
     ].compact
   end

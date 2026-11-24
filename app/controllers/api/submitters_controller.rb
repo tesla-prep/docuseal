@@ -71,7 +71,7 @@ module Api
 
         ProcessSubmitterCompletionJob.perform_async('submitter_id' => @submitter.id, 'is_last' => is_last)
       elsif normalized_params[:send_email] || normalized_params[:send_sms]
-        Submitters.send_signature_requests([@submitter])
+        send_requested_invitations(@submitter, normalized_params)
       end
 
       SearchEntries.enqueue_reindex(@submitter)
@@ -213,6 +213,11 @@ module Api
     def assign_submission_fields(submission)
       submission.template_fields ||= submission.template.fields
       submission.template_schema ||= submission.template.schema
+    end
+
+    def send_requested_invitations(submitter, attrs)
+      Submitters.send_signature_requests([submitter], email: attrs[:send_email].in?(Submitters::TRUE_VALUES),
+                                                      sms: attrs[:send_sms].in?(Submitters::TRUE_VALUES))
     end
 
     def assign_preferences(submitter, attrs)
