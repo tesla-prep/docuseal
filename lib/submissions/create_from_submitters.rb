@@ -86,9 +86,6 @@ module Submissions
           raise BaseError, 'Recipient emails should differ' if submission_emails.uniq.size != submission_emails.size
         end
 
-        phone_2fa_error = submission.submitters.lazy.filter_map(&:phone_2fa_error).first
-        raise BaseError, phone_2fa_error if phone_2fa_error
-
         next if submission.submitters.blank?
 
         maybe_add_invite_submitters(submission, template, attrs[:submitters])
@@ -99,10 +96,15 @@ module Submissions
 
         assign_submitters_is_viewer(submission)
 
+        phone_2fa_error = submission.submitters.lazy.filter_map(&:phone_2fa_error).first
+        raise BaseError, phone_2fa_error if phone_2fa_error
+
         submission.template = nil unless with_template
 
-        submission.tap(&:save!)
+        submission
       end
+
+      ApplicationRecord.transaction { submissions.each(&:save!) }
 
       maybe_enqueue_expire_at(submissions)
 
