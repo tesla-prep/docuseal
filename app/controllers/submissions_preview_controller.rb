@@ -56,7 +56,7 @@ class SubmissionsPreviewController < ApplicationController
   def use_signature?(submission)
     return false if current_user && can?(:read, submission)
     return true if submission.submitters.any? do |e|
-      Submitters::AuthorizedForForm.phone_2fa_required?(e) || e.preferences['require_email_2fa']
+      e.preferences['require_phone_2fa'] || e.preferences['require_email_2fa']
     end
     return true if submission.template&.preferences&.dig('require_phone_2fa')
     return true if submission.template&.preferences&.dig('require_email_2fa')

@@ -188,7 +188,11 @@
 <% end %>
 <% if @form_configs[:with_delegate] && !@submitter.viewer? %>
   <%= render 'shared/html_modal', title: t(:delegate), uuid: delegate_modal_id do %>
-    <%= render 'submit_form/delegate_form', submitter: @submitter %>
+    <% if Submitters::AuthorizedForForm.phone_2fa_required?(@submitter) %>
+      <p dir="auto" class="text-center"><%= t(:phone_2fa_document_cannot_be_delegated) %></p>
+    <% else %>
+      <%= render 'submit_form/delegate_form', submitter: @submitter %>
+    <% end %>
   <% end %>
 <% end %>
 <%= render 'scripts/autosize_field' %>

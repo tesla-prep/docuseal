@@ -122,7 +122,6 @@ module Submissions
                                             account_id: user.account_id,
                                             source:,
                                             expire_at:,
-                                            preferences: preferences.slice('require_phone_2fa'),
                                             template_submitters: template.submitters)
 
       submitter = submission.submitters.new(email: normalize_email(email),
@@ -134,6 +133,8 @@ module Submissions
       Submissions::CreateFromSubmitters.maybe_set_dynamic_documents(submission)
 
       Submissions::CreateFromSubmitters.assign_submitters_is_viewer(submission)
+
+      Submissions::CreateFromSubmitters.assign_shared_phone_2fa(submission, preferences['require_phone_2fa'])
 
       raise Submissions::CreateFromSubmitters::BaseError, submitter.phone_2fa_error if submitter.phone_2fa_error
 

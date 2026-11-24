@@ -132,7 +132,7 @@ class Submitter < ApplicationRecord
     return unless Submitters::AuthorizedForForm.phone_2fa_required?(self)
     return "Phone 2FA needs a phone number for #{name || email || 'every recipient'}" if phone.blank?
 
-    newly_required = new_record? || preferences_was.to_h['require_phone_2fa'] != preferences['require_phone_2fa']
+    newly_required = new_record? || preferences_was.to_h['require_phone_2fa'] != true
 
     'Phone 2FA needs SMS (Twilio) to be configured' if newly_required && !TwilioSms.configured?
   end

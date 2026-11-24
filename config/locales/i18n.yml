@@ -217,6 +217,7 @@ en: &en
   declined: Declined
   delegate: Delegate
   enter_the_email_address_of_the_person_you_want_to_delegate_to: Enter the email address of the person you want to delegate to
+  phone_2fa_document_cannot_be_delegated: This document needs an SMS code sent to your phone, so it cannot be delegated
   decline_reason: Decline reason
   provide_a_reason: Provide a reason
   notify_the_sender_with_the_reason_you_declined: Notify the sender with the reason you declined

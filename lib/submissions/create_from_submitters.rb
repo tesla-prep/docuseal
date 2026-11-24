@@ -15,7 +15,7 @@ module Submissions
         submission_preferences = Submitters.normalize_preferences(user.account, user, attrs)
         submission_preferences = preferences.merge(submission_preferences)
 
-        set_submission_preferences = submission_preferences.slice('send_email', 'bcc_completed', 'require_phone_2fa')
+        set_submission_preferences = submission_preferences.slice('send_email', 'bcc_completed')
         set_submission_preferences['send_email'] = true if params['send_completed_email']
         expire_at = attrs[:expire_at] || Templates.build_default_expire_at(template)
 
@@ -95,6 +95,8 @@ module Submissions
                                 preferences: preferences.merge(submission_preferences))
 
         assign_submitters_is_viewer(submission)
+
+        assign_shared_phone_2fa(submission, submission_preferences['require_phone_2fa'])
 
         phone_2fa_error = submission.submitters.lazy.filter_map(&:phone_2fa_error).first
         raise BaseError, phone_2fa_error if phone_2fa_error
@@ -181,6 +183,16 @@ module Submissions
       end
 
       submission
+    end
+
+    def assign_shared_phone_2fa(submission, required)
+      return unless required
+
+      submission.submitters.each do |submitter|
+        next if submitter.viewer? || submitter.preferences.key?('require_phone_2fa')
+
+        submitter.preferences['require_phone_2fa'] = true
+      end
     end
 
     def maybe_enqueue_expire_at(submissions)
