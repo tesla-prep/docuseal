@@ -15,6 +15,12 @@ module Api
       }
     end
 
+    # The address as DocuSeal would store it for a signer, typo fixes included, without storing anything; API callers
+    # that show the address before sending use it to refuse one that would change.
+    def normalize_email
+      render json: { email: Submissions.normalize_email(params[:email]) }
+    end
+
     def verify
       file = Base64.decode64(params[:file])
 
