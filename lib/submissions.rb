@@ -124,11 +124,13 @@ module Submissions
                                             expire_at:,
                                             template_submitters: template.submitters)
 
-      submission.submitters.new(email: normalize_email(email),
-                                uuid: template.submitters.first['uuid'],
-                                account_id: user.account_id,
-                                preferences:,
-                                sent_at: mark_as_sent ? Time.current : nil)
+      submitter = submission.submitters.new(email: normalize_email(email),
+                                            uuid: template.submitters.first['uuid'],
+                                            account_id: user.account_id,
+                                            preferences:,
+                                            sent_at: mark_as_sent ? Time.current : nil)
+
+      raise Submissions::CreateFromSubmitters::BaseError, submitter.phone_2fa_error if submitter.phone_2fa_error
 
       Submissions::CreateFromSubmitters.maybe_set_dynamic_documents(submission)
 

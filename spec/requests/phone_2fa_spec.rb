@@ -35,15 +35,31 @@ describe 'Phone 2FA code' do
     expect(response).to redirect_to(submit_form_path(submitter.slug))
   end
 
-  it 'texts nothing when the submission is archived or the signer has completed' do
+  it 'texts nothing when the submission is archived or the signer has declined' do
     submission.update!(archived_at: Time.current)
     put '/submit_form_phone_2fa', params: { submitter_slug: submitter.slug }
 
     submission.update!(archived_at: nil)
-    submitter.update!(completed_at: Time.current)
+    submitter.update!(declined_at: Time.current)
     put '/submit_form_phone_2fa', params: { submitter_slug: submitter.slug }
 
     expect(twilio).not_to have_been_requested
+  end
+
+  it 'texts nothing when the account is archived' do
+    account.update!(archived_at: Time.current)
+
+    put '/submit_form_phone_2fa', params: { submitter_slug: submitter.slug }
+
+    expect(twilio).not_to have_been_requested
+  end
+
+  it 'keeps the phone when an API update would remove it' do
+    put "/api/submitters/#{submitter.id}", headers: { 'x-auth-token': author.access_token.token },
+                                           params: { phone: '' }.to_json
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(submitter.reload.phone).to eq('+12145550100')
   end
 
   it 'records no verification when phone 2FA is not required' do

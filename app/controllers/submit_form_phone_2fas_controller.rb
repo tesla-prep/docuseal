@@ -66,11 +66,7 @@ class SubmitFormPhone2fasController < ApplicationController
   end
 
   def redirect_unless_code_expected
-    submission = @submitter.submission
-
-    return if Submitters::AuthorizedForForm.phone_2fa_required?(@submitter) && @submitter.phone.present? &&
-              !@submitter.completed_at? && !@submitter.declined_at? && !submission.completed_at? &&
-              !submission.archived_at? && !submission.expired? && !submission.template&.archived_at?
+    return if Submitters::AuthorizedForForm.phone_2fa_code_allowed?(@submitter)
 
     redirect_to submit_form_path(@submitter.slug, lang:)
   end

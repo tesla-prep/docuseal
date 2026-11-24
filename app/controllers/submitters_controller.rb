@@ -46,7 +46,7 @@ class SubmittersController < ApplicationController
 
       redirect_back fallback_location: submission_path(submission), notice: I18n.t('changes_have_been_saved')
     else
-      redirect_back fallback_location: submission_path(submission), alert: I18n.t('unable_to_save')
+      redirect_back fallback_location: submission_path(submission), alert: save_error_message
     end
   end
 
@@ -56,6 +56,10 @@ class SubmittersController < ApplicationController
     !@submitter.submission_events.exists?(event_type: 'start_form') &&
       !@submitter.completed_at? && !@submitter.declined_at? && !submission.completed_at? &&
       !submission.archived_at? && !submission.expired? && !submission.template&.archived_at?
+  end
+
+  def save_error_message
+    @submitter.errors.full_messages.to_sentence.presence || I18n.t('unable_to_save')
   end
 
   def maybe_resend_email_sms(submitter, params)

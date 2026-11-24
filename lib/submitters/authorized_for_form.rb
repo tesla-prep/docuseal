@@ -54,6 +54,14 @@ module Submitters
         submitter.preferences['require_phone_2fa'] == true
     end
 
+    def phone_2fa_code_allowed?(submitter)
+      submission = submitter.submission
+
+      phone_2fa_required?(submitter) && submitter.phone.present? && !submitter.declined_at? &&
+        !submitter.account.archived_at? && !submission.archived_at? && !submission.expired? &&
+        !submission.template&.archived_at?
+    end
+
     def phone_2fa_key(submitter)
       [submitter.slug, submitter.phone].join(':')
     end

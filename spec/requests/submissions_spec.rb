@@ -220,6 +220,36 @@ describe 'Submission API' do
   end
 
   describe 'POST /api/submissions with phone 2FA' do
+    let(:twilio_env) do
+      { 'TWILIO_ACCOUNT_SID' => 'AC0', 'TWILIO_API_KEY_SID' => 'SK0', 'TWILIO_API_KEY_SECRET' => 'secret',
+        'TWILIO_MESSAGING_SERVICE_SID' => 'MG0' }
+    end
+
+    before { stub_const('ENV', ENV.to_h.merge(twilio_env)) }
+
+    it 'refuses a send by emails only' do
+      post '/api/submissions/emails', headers: { 'x-auth-token': author.access_token.token }, params: {
+        template_id: templates[0].id, emails: 'john.doe@example.com', require_phone_2fa: true
+      }.to_json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.parsed_body['error']).to eq('Phone 2FA needs a phone number for john.doe@example.com')
+      expect(Submission.count).to eq(0)
+    end
+
+    it 'refuses to turn phone 2FA on when SMS is not configured' do
+      stub_const('ENV', ENV.to_h.except(*twilio_env.keys))
+
+      post '/api/submissions', headers: { 'x-auth-token': author.access_token.token }, params: {
+        template_id: templates[0].id,
+        submitters: [{ role: 'First Party', email: 'john.doe@example.com', phone: '+12145550100',
+                       require_phone_2fa: true }]
+      }.to_json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.parsed_body['error']).to eq('Phone 2FA needs SMS (Twilio) to be configured')
+    end
+
     it 'refuses a signer without a phone when phone 2FA is required' do
       post '/api/submissions', headers: { 'x-auth-token': author.access_token.token }, params: {
         template_id: multiple_submitters_template.id,

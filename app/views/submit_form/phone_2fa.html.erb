@@ -26,7 +26,7 @@
         </div>
       </div>
     </div>
-    <% if @submitter.phone.present? %>
+    <% if Submitters::AuthorizedForForm.phone_2fa_code_allowed?(@submitter) %>
       <div>
         <%= t('the_sender_has_requested_a_two_factor_authentication_via_one_time_password_sent_to_your_html', phone: TextUtils.mask_value(@submitter.phone, -4)) %>
       </div>

@@ -86,9 +86,8 @@ module Submissions
           raise BaseError, 'Recipient emails should differ' if submission_emails.uniq.size != submission_emails.size
         end
 
-        if (no_phone = submission.submitters.find { |s| s.preferences['require_phone_2fa'] == true && s.phone.blank? })
-          raise BaseError, "Phone 2FA needs a phone number for #{no_phone.name || no_phone.email || 'every recipient'}"
-        end
+        phone_2fa_error = submission.submitters.lazy.filter_map(&:phone_2fa_error).first
+        raise BaseError, phone_2fa_error if phone_2fa_error
 
         next if submission.submitters.blank?
 

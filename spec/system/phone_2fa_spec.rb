@@ -58,6 +58,15 @@ RSpec.describe 'Phone 2FA' do
     expect(page).to have_no_field('First Name')
   end
 
+  it 'shows the completed document after the code in a new browser' do
+    submitter.update!(completed_at: Time.current)
+
+    pass_phone_2fa
+
+    expect(page).to have_current_path(submit_form_completed_path(submitter.slug))
+    expect(page).to have_css('download-button')
+  end
+
   it 'asks for a new code after the phone number changes' do
     pass_phone_2fa
 
