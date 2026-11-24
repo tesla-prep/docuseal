@@ -185,16 +185,24 @@ module Submitters
 
   def send_signature_requests(submitters, delay_seconds: nil)
     submitters.each_with_index do |submitter, index|
-      next if submitter.email.blank?
       next if submitter.declined_at?
-      next if submitter.preferences['send_email'] == false
 
-      if delay_seconds
-        SendSubmitterInvitationEmailJob.perform_in((delay_seconds + index).seconds, 'submitter_id' => submitter.id)
-      else
-        SendSubmitterInvitationEmailJob.perform_async('submitter_id' => submitter.id)
+      invitation_jobs(submitter).each do |job|
+        if delay_seconds
+          job.perform_in((delay_seconds + index).seconds, 'submitter_id' => submitter.id)
+        else
+          job.perform_async('submitter_id' => submitter.id)
+        end
       end
     end
+  end
+
+  def invitation_jobs(submitter)
+    [
+      (SendSubmitterInvitationEmailJob if submitter.email.present? && submitter.preferences['send_email'] != false),
+      (SendSubmitterInvitationSmsJob if submitter.phone.present? && submitter.preferences['send_sms'] == true &&
+                                        TwilioSms.configured?)
+    ].compact
   end
 
   # rubocop:disable-next Metrics
