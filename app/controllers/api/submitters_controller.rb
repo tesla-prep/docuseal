@@ -79,7 +79,7 @@ module Api
       render json: Submitters::SerializeForApi.call(@submitter, with_template: false, with_urls: true,
                                                                 with_events: false, params:)
     rescue Submitters::NormalizeValues::BaseError, Submitters::SubmitValues::ValidationError,
-           Submissions::CreateFromSubmitters::BaseError, DownloadUtils::UnableToDownload => e
+           DownloadUtils::UnableToDownload => e
       Rollbar.warning(e) if defined?(Rollbar)
 
       render json: { error: e.message }, status: :unprocessable_content
@@ -131,7 +131,7 @@ module Api
         values[f['uuid']].present? && f['type'] == 'phone'
       end&.dig('uuid')
 
-      submitter.email = Submissions.normalize_email(attrs[:email], fix_typos: false) if attrs.key?(:email)
+      submitter.email = Submissions.normalize_email(attrs[:email]) if attrs.key?(:email)
       submitter.name = attrs[:name] if attrs.key?(:name)
 
       if attrs.key?(:phone)

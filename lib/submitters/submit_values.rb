@@ -488,7 +488,7 @@ module Submitters
         next if value.blank?
 
         if value.include?('@')
-          email = Submissions.normalize_email(value, fix_typos: !request&.path.to_s.start_with?('/api/'))
+          email = Submissions.normalize_email(value)
         elsif value.match?(PHONE_REGEXP)
           phone = value.gsub(/[^+\d]/, '')
         end
